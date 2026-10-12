@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Locale;
 
+
 public class MatMul {
 
     static void matmul(double[] a, double[] b, double[] c, int n) {

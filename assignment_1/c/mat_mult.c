@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+
 #ifdef _WIN32
 #include <windows.h>
 static double now_seconds(void) {
@@ -142,3 +143,8 @@ int main(int argc, char **argv) {
     free(c);
     return 0;
 }
+
+
+
+
+
