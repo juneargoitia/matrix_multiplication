@@ -8,9 +8,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.Locale;
 
 
-public class MatMul {
+public class MatMult {
 
-    static void matmul(double[] a, double[] b, double[] c, int n) {
+    static void matmult(double[] a, double[] b, double[] c, int n) {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 double sum = 0.0;
@@ -67,7 +67,7 @@ public class MatMul {
 
     public static void main(String[] args) throws IOException {
         if (args.length != 5 && args.length != 6) {
-            System.err.println("usage: java MatMul A.bin B.bin n warmup reps [out.bin]");
+            System.err.println("usage: java MatMult A.bin B.bin n warmup reps [out.bin]");
             System.exit(2);
         }
         int n = Integer.parseInt(args[2]);
@@ -101,13 +101,13 @@ public class MatMul {
 
         for (int w = 0; w < warmup; w++) {
             long t0 = System.nanoTime();
-            matmul(a, b, c, n);
+            matmult(a, b, c, n);
             long t1 = System.nanoTime();
             emit(String.format(Locale.ROOT, "WARMUP,%d,%.9f", w, (t1 - t0) * 1e-9));
         }
         for (int r = 0; r < reps; r++) {
             long t0 = System.nanoTime();
-            matmul(a, b, c, n);
+            matmult(a, b, c, n);
             long t1 = System.nanoTime();
             emit(String.format(Locale.ROOT, "REP,%d,%.9f", r, (t1 - t0) * 1e-9));
         }
