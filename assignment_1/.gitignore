@@ -1,0 +1,15 @@
+# Compilados y ejecutables de C y Java
+c/matmul_c
+c/matmul_c.exe
+java/out/
+*.class
+*.exe
+
+# Datos binarios grandes (se generan con generate_inputs.py)
+assignment_1/data/*.bin
+data/*.bin
+
+# Resultados de pruebas rápidas (smoke) y caché de Python
+results/smoke/
+__pycache__/
+*.pyc

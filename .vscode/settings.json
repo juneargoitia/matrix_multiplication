@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./assignment_1/script"
+    ]
+}
