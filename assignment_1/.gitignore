@@ -1,15 +1,16 @@
-# Compilados y ejecutables de C y Java
+#Build outputs (created by scripts/build.py)
 c/matmul_c
 c/matmul_c.exe
 java/out/
 *.class
 *.exe
 
-# Datos binarios grandes (se generan con generate_inputs.py)
-assignment_1/data/*.bin
+#Generated inputs: recreate with scripts/generate_inputs.py (data/manifest.csv IS committed)
 data/*.bin
 
-# Resultados de pruebas rápidas (smoke) y caché de Python
+#Quick smoke-test results (the full results in results/ ARE committed)
 results/smoke/
+
+#Python caches
 __pycache__/
 *.pyc
