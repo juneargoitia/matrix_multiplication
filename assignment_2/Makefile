@@ -1,8 +1,10 @@
 CC = gcc
-CFLAGS = -O3 -Wall -Wextra
+CFLAGS = -O3 -std=c11 -Wall -Wextra
 
 SRC_DIR = src
 BIN_DIR = .
+
+.PHONY: all clean
 
 all: baseline optimized_loop optimized_tile sparse_mult
 
