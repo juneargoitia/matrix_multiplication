@@ -13,7 +13,7 @@ typedef struct {
 
 double** allocate_matrix(int n) {
     double **matrix = (double **)malloc(n * sizeof(double *));
-    if (!matrix) { exit(EXIT_FAILURE); }
+    if (!matrix) exit(EXIT_FAILURE);
     for (int i = 0; i < n; i++) {
         matrix[i] = (double *)malloc(n * sizeof(double));
         if (!matrix[i]) { exit(EXIT_FAILURE); }
@@ -22,9 +22,7 @@ double** allocate_matrix(int n) {
 }
 
 void free_matrix(int n, double **matrix) {
-    for (int i = 0; i < n; i++) {
-        free(matrix[i]);
-    }
+    for (int i = 0; i < n; i++) free(matrix[i]);
     free(matrix);
 }
 
@@ -71,9 +69,7 @@ void free_csr(CSRMatrix *csr) {
 
 void multiply_dense_csr(int n, double **A, CSRMatrix *B, double **C) {
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            C[i][j] = 0.0;
-        }
+        for (int j = 0; j < n; j++) C[i][j] = 0.0;
     }
 
     for (int i = 0; i < n; i++) {
@@ -93,7 +89,7 @@ void multiply_dense_csr(int n, double **A, CSRMatrix *B, double **C) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <matrix_size>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <matrix_size> [sparsity_threshold_0_to_1]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -105,12 +101,19 @@ int main(int argc, char *argv[]) {
     double **C = allocate_matrix(n);
 
     srand(42);
+    int nnz_a = 0, nnz_b = 0;
+
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            A[i][j] = ((double)rand() / RAND_MAX < 0.5) ? ((double)(rand() % 10) + 1.0) : 0.0;
-            
+            double val_a = ((double)(rand() % 10) + 1.0);
+            A[i][j] = ((double)rand() / RAND_MAX > 0.5) ? val_a : 0.0;
+            if (A[i][j] != 0.0) nnz_a++;
+
+            double val_b = ((double)(rand() % 10) + 1.0);
             double prob = (double)rand() / RAND_MAX;
-            B_dense[i][j] = (prob >= sparsity_target) ? ((double)(rand() % 10) + 1.0) : 0.0;
+            B_dense[i][j] = (prob >= sparsity_target) ? val_b : 0.0;
+            if (B_dense[i][j] != 0.0) nnz_b++;
+
             C[i][j] = 0.0;
         }
     }
@@ -127,11 +130,17 @@ int main(int argc, char *argv[]) {
     clock_gettime(CLOCK_MONOTONIC, &end);
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
 
+    int nnz_c = 0;
     double checksum = 0.0;
-    for (int i = 0; i < n; i++) checksum += C[i][i];
+    for (int i = 0; i < n; i++) {
+        checksum += C[i][i];
+        for (int j = 0; j < n; j++) {
+            if (C[i][j] != 0.0) nnz_c++;
+        }
+    }
 
-    printf("SPARSE CSR: n = %d | NNZ(B) = %d | ConvTime = %.6fs | MultTime = %.6fs | Checksum = %.4f\n", 
-           n, B_csr->non_zeros, conversion_time, elapsed, checksum);
+    printf("SPARSE CSR: n = %d | TargetSparsity = %.2f | NNZ(A) = %d | NNZ(B) = %d | NNZ(C) = %d | ConvTime = %.6f seconds | MultTime = %.6f seconds | Checksum = %.4f\n", 
+            n, sparsity_target, nnz_a, nnz_b, nnz_c, conversion_time, elapsed, checksum);
 
     free_matrix(n, A);
     free_matrix(n, B_dense);

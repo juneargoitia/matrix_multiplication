@@ -20,5 +20,8 @@ optimized_tile: $(SRC_DIR)/optimized_tile.c
 sparse_mult: $(SRC_DIR)/sparse_mult.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/sparse_mult.c -o $(BIN_DIR)/sparse_mult.exe
 
+test: $(SRC_DIR)/test.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/test.c -o $(BIN_DIR)/test.exe
+	
 clean:
 	@if exist *.exe del /f /q *.exe
