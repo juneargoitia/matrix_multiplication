@@ -29,6 +29,7 @@ for name, exe in executables.items():
     
     for n in sizes:
         times = []
+        conv_times = []
         for rep in range(repetitions):
             args = [exe, str(n)]
             if 'Cache Tiling' in name:
@@ -38,16 +39,26 @@ for name, exe in executables.items():
             
             try:
                 result = subprocess.run(args, capture_output=True, text=True, check=True)
-                match = re.search(r'(?:Time|MultTime)\s*=\s*([0-9.]+)\s*seconds', result.stdout)
+                output = result.stdout
+                
+                match = re.search(r'(?:Time|MultTime)\s*=\s*([0-9.]+)\s*seconds?', output)
+                match_conv = re.search(r'ConvTime\s*=\s*([0-9.]+)\s*s', output)
+                
                 if match:
                     t = float(match.group(1))
                     times.append(t)
+                    
+                    ct = float(match_conv.group(1)) if match_conv else 0.0
+                    conv_times.append(ct)
+                    
                     is_warmup = "Yes" if rep == 0 else "No"
-                    raw_records.append(f"{n},{name},{rep},{is_warmup},{t}\n")
+                    raw_records.append(f"{n},{name},{rep},{is_warmup},{t},{ct}\n")
+                    
             except Exception as e:
                 print(f" [Error] n={n}, rep={rep}: {e}")
         
         valid_times = times[1:] if len(times) > 1 else times
+        
         if valid_times:
             med = np.median(valid_times)
             q75, q25 = np.percentile(valid_times, [75 ,25])
@@ -81,7 +92,7 @@ plt.title('Performance with Statistical Rigor (Median and IQR)', fontsize=14, fo
 plt.legend(fontsize=10)
 plt.grid(True, linestyle='--', alpha=0.7)
 
-plot_path = 'results/performance_plot.png'
+plot_path = 'results/performance_plot_robust.png'
 plt.savefig(plot_path, dpi=300, bbox_inches='tight')
 print(f"Graph successfully generated and saved in '{plot_path}'")
 

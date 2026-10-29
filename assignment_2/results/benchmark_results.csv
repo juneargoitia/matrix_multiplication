@@ -1,106 +1,106 @@
 Size,Method,Repetition,IsWarmup,TimeSeconds
-200,Baseline (Naive),0,Yes,0.011018
-200,Baseline (Naive),1,No,0.024167
-200,Baseline (Naive),2,No,0.014046
-200,Baseline (Naive),3,No,0.013858
-200,Baseline (Naive),4,No,0.012541
-200,Baseline (Naive),5,No,0.035321
-200,Baseline (Naive),6,No,0.013872
-400,Baseline (Naive),0,Yes,0.219352
-400,Baseline (Naive),1,No,0.27972
-400,Baseline (Naive),2,No,0.174475
-400,Baseline (Naive),3,No,0.187905
-400,Baseline (Naive),4,No,0.481617
-400,Baseline (Naive),5,No,0.190568
-400,Baseline (Naive),6,No,0.179214
-600,Baseline (Naive),0,Yes,0.6034
-600,Baseline (Naive),1,No,0.436585
-600,Baseline (Naive),2,No,0.491829
-600,Baseline (Naive),3,No,0.660684
-600,Baseline (Naive),4,No,0.597178
-600,Baseline (Naive),5,No,0.38212
-600,Baseline (Naive),6,No,0.57391
-800,Baseline (Naive),0,Yes,1.04049
-800,Baseline (Naive),1,No,0.944549
-800,Baseline (Naive),2,No,0.954178
-800,Baseline (Naive),3,No,1.000838
-800,Baseline (Naive),4,No,0.942428
-800,Baseline (Naive),5,No,1.226913
-800,Baseline (Naive),6,No,0.951563
-1000,Baseline (Naive),0,Yes,5.06432
-1000,Baseline (Naive),1,No,4.963274
-1000,Baseline (Naive),2,No,4.996259
-1000,Baseline (Naive),3,No,5.167156
-1000,Baseline (Naive),4,No,4.903828
-1000,Baseline (Naive),5,No,4.98964
-1000,Baseline (Naive),6,No,5.868143
-200,Loop Reordering,0,Yes,0.007195
-200,Loop Reordering,1,No,0.005388
-200,Loop Reordering,2,No,0.002373
-200,Loop Reordering,3,No,0.002868
-200,Loop Reordering,4,No,0.002486
-200,Loop Reordering,5,No,0.003328
-200,Loop Reordering,6,No,0.004063
-400,Loop Reordering,0,Yes,0.029051
-400,Loop Reordering,1,No,0.023403
-400,Loop Reordering,2,No,0.020932
-400,Loop Reordering,3,No,0.021225
-400,Loop Reordering,4,No,0.037192
-400,Loop Reordering,5,No,0.035387
-400,Loop Reordering,6,No,0.123425
-600,Loop Reordering,0,Yes,0.252757
-600,Loop Reordering,1,No,0.150374
-600,Loop Reordering,2,No,0.116459
-600,Loop Reordering,3,No,0.111467
-600,Loop Reordering,4,No,0.105443
-600,Loop Reordering,5,No,0.103065
-600,Loop Reordering,6,No,0.120497
-800,Loop Reordering,0,Yes,0.405041
-800,Loop Reordering,1,No,0.413142
-800,Loop Reordering,2,No,0.402732
-800,Loop Reordering,3,No,0.415967
-800,Loop Reordering,4,No,0.410824
-800,Loop Reordering,5,No,0.411964
-800,Loop Reordering,6,No,0.396572
-1000,Loop Reordering,0,Yes,0.792221
-1000,Loop Reordering,1,No,0.888363
-1000,Loop Reordering,2,No,1.017355
-1000,Loop Reordering,3,No,0.811998
-1000,Loop Reordering,4,No,0.804932
-1000,Loop Reordering,5,No,1.044048
-1000,Loop Reordering,6,No,0.803601
-200,Cache Tiling (B=64),0,Yes,0.004091
-200,Cache Tiling (B=64),1,No,0.006719
-200,Cache Tiling (B=64),2,No,0.007247
-200,Cache Tiling (B=64),3,No,0.004682
-200,Cache Tiling (B=64),4,No,0.00348
-200,Cache Tiling (B=64),5,No,0.004343
-200,Cache Tiling (B=64),6,No,0.004841
-400,Cache Tiling (B=64),0,Yes,0.03303
-400,Cache Tiling (B=64),1,No,0.026892
-400,Cache Tiling (B=64),2,No,0.028212
-400,Cache Tiling (B=64),3,No,0.032549
-400,Cache Tiling (B=64),4,No,0.029206
-400,Cache Tiling (B=64),5,No,0.03101
-400,Cache Tiling (B=64),6,No,0.03075
-600,Cache Tiling (B=64),0,Yes,0.109626
-600,Cache Tiling (B=64),1,No,0.098981
-600,Cache Tiling (B=64),2,No,0.109315
-600,Cache Tiling (B=64),3,No,0.114543
-600,Cache Tiling (B=64),4,No,0.208267
-600,Cache Tiling (B=64),5,No,0.110901
-600,Cache Tiling (B=64),6,No,0.104805
-800,Cache Tiling (B=64),0,Yes,0.255835
-800,Cache Tiling (B=64),1,No,0.248798
-800,Cache Tiling (B=64),2,No,0.326383
-800,Cache Tiling (B=64),3,No,0.271082
-800,Cache Tiling (B=64),4,No,0.251787
-800,Cache Tiling (B=64),5,No,0.275129
-800,Cache Tiling (B=64),6,No,0.25399
-1000,Cache Tiling (B=64),0,Yes,0.560633
-1000,Cache Tiling (B=64),1,No,0.512866
-1000,Cache Tiling (B=64),2,No,0.500361
-1000,Cache Tiling (B=64),3,No,0.572654
-1000,Cache Tiling (B=64),4,No,0.533151
-1000,Cache Tiling (B=64),5,No,0.534499
-1000,Cache Tiling (B=64),6,No,0.683382
+200,Baseline (Naive),0,Yes,0.008037,0.0
+200,Baseline (Naive),1,No,0.008701,0.0
+200,Baseline (Naive),2,No,0.008189,0.0
+200,Baseline (Naive),3,No,0.00741,0.0
+200,Baseline (Naive),4,No,0.00701,0.0
+200,Baseline (Naive),5,No,0.007077,0.0
+200,Baseline (Naive),6,No,0.007176,0.0
+400,Baseline (Naive),0,Yes,0.080645,0.0
+400,Baseline (Naive),1,No,0.070122,0.0
+400,Baseline (Naive),2,No,0.074788,0.0
+400,Baseline (Naive),3,No,0.074188,0.0
+400,Baseline (Naive),4,No,0.127539,0.0
+400,Baseline (Naive),5,No,0.077692,0.0
+400,Baseline (Naive),6,No,0.077443,0.0
+600,Baseline (Naive),0,Yes,0.26085,0.0
+600,Baseline (Naive),1,No,0.257866,0.0
+600,Baseline (Naive),2,No,0.269906,0.0
+600,Baseline (Naive),3,No,0.255617,0.0
+600,Baseline (Naive),4,No,0.283474,0.0
+600,Baseline (Naive),5,No,0.257877,0.0
+600,Baseline (Naive),6,No,0.268263,0.0
+800,Baseline (Naive),0,Yes,0.700806,0.0
+800,Baseline (Naive),1,No,0.694217,0.0
+800,Baseline (Naive),2,No,0.6814,0.0
+800,Baseline (Naive),3,No,0.675123,0.0
+800,Baseline (Naive),4,No,0.687929,0.0
+800,Baseline (Naive),5,No,0.715631,0.0
+800,Baseline (Naive),6,No,0.675682,0.0
+1000,Baseline (Naive),0,Yes,4.453437,0.0
+1000,Baseline (Naive),1,No,4.40332,0.0
+1000,Baseline (Naive),2,No,4.07946,0.0
+1000,Baseline (Naive),3,No,4.054153,0.0
+1000,Baseline (Naive),4,No,4.114882,0.0
+1000,Baseline (Naive),5,No,4.276402,0.0
+1000,Baseline (Naive),6,No,4.366161,0.0
+200,Loop Reordering,0,Yes,0.004241,0.0
+200,Loop Reordering,1,No,0.006169,0.0
+200,Loop Reordering,2,No,0.00418,0.0
+200,Loop Reordering,3,No,0.00435,0.0
+200,Loop Reordering,4,No,0.00271,0.0
+200,Loop Reordering,5,No,0.002471,0.0
+200,Loop Reordering,6,No,0.002444,0.0
+400,Loop Reordering,0,Yes,0.020225,0.0
+400,Loop Reordering,1,No,0.01854,0.0
+400,Loop Reordering,2,No,0.021927,0.0
+400,Loop Reordering,3,No,0.019575,0.0
+400,Loop Reordering,4,No,0.019461,0.0
+400,Loop Reordering,5,No,0.023034,0.0
+400,Loop Reordering,6,No,0.020296,0.0
+600,Loop Reordering,0,Yes,0.076374,0.0
+600,Loop Reordering,1,No,0.081047,0.0
+600,Loop Reordering,2,No,0.078163,0.0
+600,Loop Reordering,3,No,0.073317,0.0
+600,Loop Reordering,4,No,0.078975,0.0
+600,Loop Reordering,5,No,0.081834,0.0
+600,Loop Reordering,6,No,0.078632,0.0
+800,Loop Reordering,0,Yes,0.318382,0.0
+800,Loop Reordering,1,No,0.310083,0.0
+800,Loop Reordering,2,No,0.299974,0.0
+800,Loop Reordering,3,No,0.312997,0.0
+800,Loop Reordering,4,No,0.302208,0.0
+800,Loop Reordering,5,No,0.310191,0.0
+800,Loop Reordering,6,No,0.326678,0.0
+1000,Loop Reordering,0,Yes,0.627911,0.0
+1000,Loop Reordering,1,No,0.635821,0.0
+1000,Loop Reordering,2,No,0.631612,0.0
+1000,Loop Reordering,3,No,0.634526,0.0
+1000,Loop Reordering,4,No,0.632427,0.0
+1000,Loop Reordering,5,No,0.642767,0.0
+1000,Loop Reordering,6,No,0.661248,0.0
+200,Cache Tiling (B=64),0,Yes,0.004558,0.0
+200,Cache Tiling (B=64),1,No,0.004035,0.0
+200,Cache Tiling (B=64),2,No,0.003745,0.0
+200,Cache Tiling (B=64),3,No,0.003957,0.0
+200,Cache Tiling (B=64),4,No,0.002356,0.0
+200,Cache Tiling (B=64),5,No,0.00315,0.0
+200,Cache Tiling (B=64),6,No,0.002368,0.0
+400,Cache Tiling (B=64),0,Yes,0.021477,0.0
+400,Cache Tiling (B=64),1,No,0.049578,0.0
+400,Cache Tiling (B=64),2,No,0.022969,0.0
+400,Cache Tiling (B=64),3,No,0.022014,0.0
+400,Cache Tiling (B=64),4,No,0.020379,0.0
+400,Cache Tiling (B=64),5,No,0.019514,0.0
+400,Cache Tiling (B=64),6,No,0.026666,0.0
+600,Cache Tiling (B=64),0,Yes,0.074798,0.0
+600,Cache Tiling (B=64),1,No,0.080472,0.0
+600,Cache Tiling (B=64),2,No,0.082173,0.0
+600,Cache Tiling (B=64),3,No,0.082647,0.0
+600,Cache Tiling (B=64),4,No,0.095282,0.0
+600,Cache Tiling (B=64),5,No,0.077801,0.0
+600,Cache Tiling (B=64),6,No,0.078096,0.0
+800,Cache Tiling (B=64),0,Yes,0.206026,0.0
+800,Cache Tiling (B=64),1,No,0.193409,0.0
+800,Cache Tiling (B=64),2,No,0.208762,0.0
+800,Cache Tiling (B=64),3,No,0.198127,0.0
+800,Cache Tiling (B=64),4,No,0.199134,0.0
+800,Cache Tiling (B=64),5,No,0.207211,0.0
+800,Cache Tiling (B=64),6,No,0.216889,0.0
+1000,Cache Tiling (B=64),0,Yes,0.441726,0.0
+1000,Cache Tiling (B=64),1,No,0.428567,0.0
+1000,Cache Tiling (B=64),2,No,0.596202,0.0
+1000,Cache Tiling (B=64),3,No,0.452869,0.0
+1000,Cache Tiling (B=64),4,No,0.450217,0.0
+1000,Cache Tiling (B=64),5,No,0.437205,0.0
+1000,Cache Tiling (B=64),6,No,0.462015,0.0

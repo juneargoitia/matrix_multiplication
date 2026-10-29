@@ -21,4 +21,4 @@ sparse_mult: $(SRC_DIR)/sparse_mult.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/sparse_mult.c -o $(BIN_DIR)/sparse_mult.exe
 
 clean:
-	rm -f *.exe
+	@if exist *.exe del /f /q *.exe

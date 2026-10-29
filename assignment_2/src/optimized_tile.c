@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+
 void multiply_optimized_tile(int n, double **A, double **B, double **C, int block_size) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -71,7 +72,10 @@ int main(int argc, char *argv[]) {
 
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
 
-    printf("OPTIMIZED (Cache Tiling): n = %d | Block Size = %d | Time = %.6f seconds\n", n, block_size, elapsed);
+    double checksum = 0.0;
+    for (int i = 0; i < n; i++) checksum += C[i][i];
+
+    printf("OPTIMIZED (Cache Tiling): n = %d | Block Size = %d | Checksum = %.4f | Time = %.6f seconds\n", n, block_size, checksum, elapsed);
 
     free_matrix(n, A);
     free_matrix(n, B);

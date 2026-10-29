@@ -3,7 +3,6 @@
 #include <time.h>
 
 void multiply_optimized_loop(int n, double **A, double **B, double **C) {
-    // Initialize C to zero
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             C[i][j] = 0.0;
@@ -59,7 +58,10 @@ int main(int argc, char *argv[]) {
 
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
 
-    printf("OPTIMIZED (Loop Reordering): n = %d | Time = %.6f seconds\n", n, elapsed);
+    double checksum = 0.0;
+    for (int i = 0; i < n; i++) checksum += C[i][i];
+
+    printf("OPTIMIZED (Loop Reordering): n = %d | Checksum = %.4f | Time = %.6f seconds\n", n, checksum, elapsed);
 
     free_matrix(n, A);
     free_matrix(n, B);
