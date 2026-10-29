@@ -1,12 +1,13 @@
 CC = gcc
-CFLAGS = -O3 -std=c11 -Wall -Wextra
+CFLAGS = -O3 -std=c11 -Wall -Wextra -ffp-contract=off
+LDFLAGS = -lpsapi
 
 SRC_DIR = src
 BIN_DIR = .
 
-.PHONY: all clean
+.PHONY: all clean test
 
-all: baseline optimized_loop optimized_tile sparse_mult
+all: baseline optimized_loop optimized_tile sparse_mult test
 
 baseline: $(SRC_DIR)/baseline.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/baseline.c -o $(BIN_DIR)/baseline.exe

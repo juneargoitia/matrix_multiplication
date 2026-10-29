@@ -1,7 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
+#include <stdint.h>
+#include <windows.h>
+#include <psapi.h>
 
+static uint32_t xorshift_state = 42;
+
+void seed_xorshift32(uint32_t seed) {
+    xorshift_state = seed ? seed : 42;
+}
+
+uint32_t xorshift32() {
+    uint32_t x = xorshift_state;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    return xorshift_state = x;
+}
+
+double random_double() {
+    return (double)xorshift32() / 4294967296.0;
+}
 typedef struct {
     int rows;
     int cols;
@@ -16,7 +37,7 @@ double** allocate_matrix(int n) {
     if (!matrix) exit(EXIT_FAILURE);
     for (int i = 0; i < n; i++) {
         matrix[i] = (double *)malloc(n * sizeof(double));
-        if (!matrix[i]) { exit(EXIT_FAILURE); }
+        if (!matrix[i]) exit(EXIT_FAILURE);
     }
     return matrix;
 }
@@ -87,6 +108,14 @@ void multiply_dense_csr(int n, double **A, CSRMatrix *B, double **C) {
     }
 }
 
+size_t get_peak_memory_kb() {
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+        return pmc.PeakWorkingSetSize / 1024;
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <matrix_size> [sparsity_threshold_0_to_1]\n", argv[0]);
@@ -100,17 +129,17 @@ int main(int argc, char *argv[]) {
     double **B_dense = allocate_matrix(n);
     double **C = allocate_matrix(n);
 
-    srand(42);
+    seed_xorshift32(42);
     int nnz_a = 0, nnz_b = 0;
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            double val_a = ((double)(rand() % 10) + 1.0);
-            A[i][j] = ((double)rand() / RAND_MAX > 0.5) ? val_a : 0.0;
+            double val_a = floor(random_double() * 10.0) + 1.0;
+            A[i][j] = val_a;
             if (A[i][j] != 0.0) nnz_a++;
 
-            double val_b = ((double)(rand() % 10) + 1.0);
-            double prob = (double)rand() / RAND_MAX;
+            double val_b = floor(random_double() * 10.0) + 1.0;
+            double prob = random_double();
             B_dense[i][j] = (prob >= sparsity_target) ? val_b : 0.0;
             if (B_dense[i][j] != 0.0) nnz_b++;
 
@@ -123,6 +152,8 @@ int main(int argc, char *argv[]) {
     CSRMatrix *B_csr = create_csr_from_dense(n, B_dense);
     clock_gettime(CLOCK_MONOTONIC, &conv_end);
     double conversion_time = (conv_end.tv_sec - conv_start.tv_sec) + (conv_end.tv_nsec - conv_start.tv_nsec) / 1e9;
+
+    multiply_dense_csr(n, A, B_csr, C);
 
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
@@ -139,8 +170,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    printf("SPARSE CSR: n = %d | TargetSparsity = %.2f | NNZ(A) = %d | NNZ(B) = %d | NNZ(C) = %d | ConvTime = %.6f seconds | MultTime = %.6f seconds | Checksum = %.4f\n", 
-            n, sparsity_target, nnz_a, nnz_b, nnz_c, conversion_time, elapsed, checksum);
+    size_t peak_mem_kb = get_peak_memory_kb();
+
+    printf("SPARSE CSR: n = %d | TargetSparsity = %.2f | NNZ(A) = %d | NNZ(B) = %d | NNZ(C) = %d | ConvTime = %.6f seconds | MultTime = %.6f seconds | PeakMemory = %zu KB | Checksum = %.4f\n", 
+                n, sparsity_target, nnz_a, nnz_b, nnz_c, conversion_time, elapsed, peak_mem_kb, checksum);
 
     free_matrix(n, A);
     free_matrix(n, B_dense);
