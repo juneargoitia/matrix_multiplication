@@ -12,14 +12,15 @@ sparsity_levels = [0.5, 0.8, 0.95]
 tile_block_sizes = [16, 32, 64, 128]
 
 executables = {
-    'Baseline (Naive)': './baseline.exe',
-    'Loop Reordering': './optimized_loop.exe'
+    'Baseline (Dense p=0.0)': './baseline.exe',
+    'Loop Reordering (Dense p=0.0)': './optimized_loop.exe'
 }
 
 for b in tile_block_sizes:
-    executables[f'Cache Tiling (B={b})'] = './optimized_tile.exe'
-    
+    executables[f'Cache Tiling (B={b}, p=0.0)'] = './optimized_tile.exe'
+
 for p in sparsity_levels:
+    executables[f'Loop Reordering (p={p})'] = './optimized_loop.exe'
     executables[f'Sparse CSR (p={p})'] = './sparse_mult.exe'
 
 os.makedirs('results', exist_ok=True)
@@ -27,6 +28,8 @@ raw_records = []
 summary_data = {name: {'sizes': [], 'median': [], 'q25': [], 'q75': []} for name in executables}
 
 print("Starting performance tests (benchmarks)...")
+
+reference_checksums = {}
 
 for name, exe in executables.items():
     if not os.path.exists(exe):
@@ -47,11 +50,12 @@ for name, exe in executables.items():
         for rep in range(repetitions):
             args = [exe, str(n)]
             if 'Cache Tiling' in name:
-                b_val = name.split('B=')[1].replace(')', '')
-                args.append('64')
-            elif 'Sparse CSR' in name:
+                b_val = name.split('B=')[1].split(',')[0].replace(')', '')
+                args.append(b_val)
+            elif 'p=' in name:
                 p_val = name.split('p=')[1].replace(')', '')
                 args.append(p_val)
+            is_warmup = "Yes" if rep == 0 else "No"
             
             try:
                 result = subprocess.run(args, capture_output=True, text=True, check=True, timeout=20)
@@ -63,6 +67,7 @@ for name, exe in executables.items():
                 match_nnz_b = re.search(r'NNZ\(B\)\s*=\s*([0-9]+)', output)
                 match_nnz_c = re.search(r'NNZ\(C\)\s*=\s*([0-9]+)', output)
                 match_mem = re.search(r'PeakMemory\s*=\s*([0-9]+)\s*KB', output)
+                match_chk = re.search(r'Checksum\s*=\s*([0-9.]+)', output)
                 
                 if 'Sparse CSR' in name:
                     specific_mult = re.search(r'MultTime\s*=\s*([0-9.]+)\s*(?:seconds?|s)?', output)
@@ -80,15 +85,25 @@ for name, exe in executables.items():
                     if match_nnz_c: nnz_c_val = int(match_nnz_c.group(1))
                     if match_mem: peak_mem_val = int(match_mem.group(1))
                     
-                    is_warmup = "Yes" if rep == 0 else "No"
+                    chk_val = float(match_chk.group(1)) if match_chk else 0.0
+                    
+                    key_chk = (n, 'p=0.0' if 'p=0.0' in name or 'Dense' in name else name.split('p=')[1])
+                    if key_chk not in reference_checksums:
+                        reference_checksums[key_chk] = chk_val
+                    else:
+                        if abs(reference_checksums[key_chk] - chk_val) > 1e-4:
+                            print(f"    [Alert Checksum] Discrepance in n={n} for {name}: {chk_val} vs ref {reference_checksums[key_chk]}")
+                    
                     raw_records.append(f"{n},{name},{rep},{is_warmup},{t:.6f},{ct:.6f},{nnz_a_val},{nnz_b_val},{nnz_c_val},{peak_mem_val},OK\n")
+                else:
+                    raw_records.append(f"{n},{name},{rep},{is_warmup},NaN,NaN,0,0,0,0,PARSE_ERROR\n")
+            
             except subprocess.TimeoutExpired:
                 has_timeout = True
-                is_warmup = "Yes" if rep == 0 else "No"
-                raw_records.append(f"{n},{name},{rep},{is_warmup},NaN,NaN,0,0,0,TIMEOUT\n")
+                raw_records.append(f"{n},{name},{rep},{is_warmup},NaN,NaN,0,0,0,0,TIMEOUT\n")
                 print(f"    [Timeout Registered] n={n}, rep={rep}: Time limit exceeded (20s).")
             except Exception as e:
-                raw_records.append(f"{n},{name},{rep},No,NaN,NaN,0,0,0,ERROR\n")
+                raw_records.append(f"{n},{name},{rep},{is_warmup},NaN,NaN,0,0,0,0,ERROR\n")
                 print(f"    [Error] n={n}, rep={rep}: {e}")
         
         valid_times = times[1:] if (len(times) > 1 and not has_timeout) else []
@@ -102,7 +117,7 @@ for name, exe in executables.items():
             summary_data[name]['median'].append(med)
             summary_data[name]['q25'].append(q25)
             summary_data[name]['q75'].append(q75)
-            print(f"  n = {n:4d} | Mult Median = {med:.6f} s | IQR = {q75 - q25:.6f} s")
+            print(f"  n = {n:4d} | Mult Median = {med:.6f} s | IQR = {q75 - q25:.6f} s | Peak RAM = {peak_mem_val} KB")
         else:
             print(f"  n = {n:4d} | Omitted from summary due to timeout or insufficient data.")
             
@@ -129,12 +144,12 @@ for name, dat in summary_data.items():
             
 plt.xlabel('Matrix size (n)', fontsize=12)
 plt.ylabel('Execution Time - Median (seconds)', fontsize=12)
-plt.title('Comparative Performance (Part A and Part B – Including Timeout Report)', fontsize=14, fontweight='bold')
-plt.legend(fontsize=9, loc='upper left')
+plt.title('Comparative Performance (Median and Interquartile Range)', fontsize=14, fontweight='bold')
+plt.legend(fontsize=8, loc='upper left')
 plt.grid(True, linestyle='--', alpha=0.7)
 
 plot_path = 'results/performance_plot_robust.png'
 plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-print(f"Graph successfully generated and saved in '{plot_path}'")
+print(f"Graph saved in '{plot_path}'")
 
 plt.close()

@@ -2,61 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <stdint.h>
-#include <windows.h>
-#include <psapi.h>
-
-static uint32_t xorshift_state = 42;
-
-void seed_xorshift32(uint32_t seed) {
-    xorshift_state = seed ? seed : 42;
-}
-
-uint32_t xorshift32() {
-    uint32_t x = xorshift_state;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    return xorshift_state = x;
-}
-
-double random_double() {
-    return (double)xorshift32() / 4294967296.0;
-}
-
-double** allocate_matrix(int n) {
-    double **matrix = (double **)malloc(n * sizeof(double *));
-    if (matrix == NULL) exit(EXIT_FAILURE);
-    for (int i = 0; i < n; i++) {
-        matrix[i] = (double *)malloc(n * sizeof(double));
-        if (!matrix[i]) exit(EXIT_FAILURE);
-    }
-    return matrix;
-}
-
-void free_matrix(int n, double **matrix) {
-    for (int i = 0; i < n; i++) free(matrix[i]);
-    free(matrix);
-}
-
-void multiply_baseline(int n, double **A, double **B, double **C) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            C[i][j] = 0.0;
-            for (int k = 0; k < n; k++) {
-                C[i][j] += A[i][k] * B[k][j];
-            }
-        }
-    }
-}
-
-size_t get_peak_memory_kb() {
-    PROCESS_MEMORY_COUNTERS pmc;
-    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-        return pmc.PeakWorkingSetSize / 1024;
-    }
-    return 0;
-}
+#include "common.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -103,7 +49,7 @@ int main(int argc, char *argv[]) {
 
     size_t peak_mem_kb = get_peak_memory_kb();
 
-    printf("BASELINE: n = %d | NNZ(A) = %d | NNZ(B) = %d | NNZ(C) = %d | Time = %.6f seconds | Checksum = %.4f | PeakMemory = %zu KB\n",
+    printf("BASELINE: n = %d | NNZ(A) = %d | NNZ(B) = %d | NNZ(C) = %d | Time = %.6f seconds | PeakMemory = %zu KB | Checksum = %.4f\n",
                 n, nnz_a, nnz_b, nnz_c, elapsed, peak_mem_kb, checksum);
 
     free_matrix(n, A);

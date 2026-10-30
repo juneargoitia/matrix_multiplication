@@ -2,80 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <stdint.h>
-#include <windows.h>
-#include <psapi.h>
-
-static uint32_t xorshift_state = 42;
-
-void seed_xorshift32(uint32_t seed) {
-    xorshift_state = seed ? seed : 42;
-}
-
-uint32_t xorshift32() {
-    uint32_t x = xorshift_state;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    return xorshift_state = x;
-}
-
-double random_double() {
-    return (double)xorshift32() / 4294967296.0;
-}
-
-void multiply_tile(int n, double **A, double **B, double **C, int block_size) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            C[i][j] = 0.0;
-        }
-    }
-
-    for (int ii = 0; ii < n; ii += block_size) {
-        for (int kk = 0; kk < n; kk += block_size) {
-            for (int jj = 0; jj < n; jj += block_size) {
-                int i_max = (ii + block_size < n) ? ii + block_size : n;
-                int k_max = (kk + block_size < n) ? kk + block_size : n;
-                int j_max = (jj + block_size < n) ? jj + block_size : n;
-
-                for (int i = ii; i < i_max; i++) {
-                    for (int k = kk; k < k_max; k++) {
-                        double a_ik = A[i][k];
-                        for (int j = jj; j < j_max; j++) {
-                            C[i][j] += a_ik * B[k][j];
-                        }
-                    }
-                }
-
-            }
-        }
-    }
-}
-
-double** allocate_matrix(int n) {
-    double **matrix = (double **)malloc(n * sizeof(double *));
-    if (!matrix) exit(EXIT_FAILURE);
-    for (int i = 0; i < n; i++) {
-        matrix[i] = (double *)malloc(n * sizeof(double));
-        if (!matrix[i]) exit(EXIT_FAILURE);
-    }
-    return matrix;
-}
-
-void free_matrix(int n, double **matrix) {
-    for (int i = 0; i < n; i++) {
-        free(matrix[i]);
-    }
-    free(matrix);
-}
-
-size_t get_peak_memory_kb() {
-    PROCESS_MEMORY_COUNTERS pmc;
-    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-        return pmc.PeakWorkingSetSize / 1024;
-    }
-    return 0;
-}
+#include "common.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -85,6 +12,7 @@ int main(int argc, char *argv[]) {
 
     int n = atoi(argv[1]);
     int block_size = (argc > 2) ? atoi(argv[2]) : 64;
+    double sparsity_target = (argc > 3 && atof(argv[3]) >= 0.0) ? atof(argv[3]) : 0.0;
     
     double **A = allocate_matrix(n);
     double **B = allocate_matrix(n);
@@ -94,9 +22,15 @@ int main(int argc, char *argv[]) {
     int nnz_a = 0, nnz_b = 0;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            A[i][j] = floor(random_double() * 10.0) + 1.0;
-            B[i][j] = floor(random_double() * 10.0) + 1.0;
+            double val_a = floor(random_double() * 10.0) + 1.0;
+            A[i][j] = val_a;
             if (A[i][j] != 0.0) nnz_a++;
+
+            double val_b = floor(random_double() * 10.0) + 1.0;
+
+            double prob_b = random_double();
+
+            B[i][j] = (prob_b >= sparsity_target) ? val_b : 0.0;
             if (B[i][j] != 0.0) nnz_b++;
             C[i][j] = 0.0;
         }
