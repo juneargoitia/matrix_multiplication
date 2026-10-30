@@ -7,7 +7,7 @@ One repository, one folder per assignment, so validated code and scripts can be 
 | Folder | Assignment | Status |
 |---|---|---|
 | [`assignment_1/`](assignment_1/README.md) | Basic implementations in Python, Java and C | Submitted (week 6) |
-| `assignment_2/` | Optimised approaches and sparse matrices | Not started |
+| `assignment_2/` | Optimised approaches and sparse matrices | Submitted (week 8) |
 | `assignment_3/` | Parallel multiplication (optional vectorisation) | Not started |
 | `assignment_4/` | Distributed multiplication | Not started |
 
