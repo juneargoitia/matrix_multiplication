@@ -2,10 +2,10 @@
 
 ## 1. Hardware Specifications
 * **Processor (CPU):** AMD Ryzen 3 3200U with Radeon Vega Mobile Gfx (2 physical cores, 4 logical threads)
-* **CPU Cache Hierarchy:** 
-  * L1 Cache: 128 KB (64 KB instruction + 64 KB data per core)
-  * L2 Cache: 1 MB (512 KB per core)
-  * L3 Cache: 4 MB (shared)
+  * **CPU Cache Hierarchy:**
+    * **L1 Cache:** 128 KB (64 KB instruction + 64 KB data per core)
+    * **L2 Cache:** 1 MB (512 KB per core)
+    * **L3 Cache:** 4 MB (shared)
 * **Main Memory (RAM):** 8 GB (7.46 GB usable system memory)
 
 ## 2. Software & Toolchain Specifications
@@ -20,5 +20,11 @@
 * **In-Process Warm-up:** An initial unmeasured multiplication pass is executed internally within each C process runtime to pre-fault allocated virtual memory pages and populate L1D/L2/L3 cache lines prior to high-precision timestamping (`clock_gettime`).
 * **Data Generation & Pseudorandomness:** Custom 32-bit Xorshift PRNG (`seed=42`, period $2^{32}-1$) replacing platform-dependent `rand()` (avoiding Windows `RAND_MAX = 32767` precision bottleneck) to guarantee identical bitwise matrix generation across environments.
 * **Sparsity Protocol:** Matrix $A$ is generated fully dense ($p=0.0$), while matrix $B$ enforces controlled target sparsity levels $p \in \{0.5, 0.8, 0.95\}$.
+* **Warm-up (Two levels, both declared):** 
+  1. One unmeasured multiplication inside each process.
+  2. Repetition 0 of every configuration is a full extra process run and is discarded from the statistics (7 runs launched, 6 measured).
+* **Matched Inputs:** All programs use the same generator (`generate_matrices` in `src/common.h`), so every dense method and the sparse method multiply exactly the same logical $A$ and $B$ for a given $n$ and $p$. The benchmark checks that all checksums agree.
+* **Timeout / Budget:** Each process is limited to $20\text{ s}$ wall time (including generation, warm-up, and timed pass). A timeout is stored as a `TIMEOUT` row and larger sizes of that configuration are stored as `SKIPPED_AFTER_TIMEOUT_AT_<n>`.
+* **Sparse Memory Limitation:** `sparse_mult` first builds the dense $B$ and then converts it to CSR, so its peak working set includes the dense $B$. The reported peak therefore does not show the memory saving of CSR.
 * **Memory Measurement Tool & Metric:** Peak Working Set Size (measured in Kilobytes) via Windows API (`GetProcessMemoryInfo` from `<psapi.h>`), recording maximum physical RAM allocated during runtime execution.
 * **Statistical Rigor:** 7 independent process executions per matrix size ($n$), analyzing Median and Interquartile Range (IQR, $Q_{75} - Q_{25}$).

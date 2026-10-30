@@ -50,6 +50,25 @@ static inline size_t get_peak_memory_kb(void) {
     return 0;
 }
 
+static inline void generate_matrices(int n, double p, double **A, double **B, double **C,
+                                     int *nnz_a, int *nnz_b) {
+    seed_xorshift32(42);
+    int na = 0, nb = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            double val_a = floor(random_double() * 10.0) + 1.0;
+            double val_b = floor(random_double() * 10.0) + 1.0;
+            double prob_b = random_double();
+            A[i][j] = val_a;
+            B[i][j] = (prob_b >= p) ? val_b : 0.0;
+            if (A[i][j] != 0.0) na++;
+            if (B[i][j] != 0.0) nb++;
+            if (C) C[i][j] = 0.0;
+        }
+    }
+    if (nnz_a) *nnz_a = na;
+    if (nnz_b) *nnz_b = nb;
+}
 typedef struct {
     int rows;
     int cols;

@@ -18,23 +18,8 @@ int main(int argc, char *argv[]) {
     double **B = allocate_matrix(n);
     double **C = allocate_matrix(n);
 
-    seed_xorshift32(42);
     int nnz_a = 0, nnz_b = 0;
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            double val_a = floor(random_double() * 10.0) + 1.0;
-            A[i][j] = val_a;
-            if (A[i][j] != 0.0) nnz_a++;
-
-            double val_b = floor(random_double() * 10.0) + 1.0;
-
-            double prob_b = random_double();
-
-            B[i][j] = (prob_b >= sparsity_target) ? val_b : 0.0;
-            if (B[i][j] != 0.0) nnz_b++;
-            C[i][j] = 0.0;
-        }
-    }
+    generate_matrices(n, sparsity_target, A, B, C, &nnz_a, &nnz_b);
 
     multiply_tile(n, A, B, C, block_size);
 
