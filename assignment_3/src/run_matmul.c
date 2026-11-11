@@ -58,10 +58,12 @@ int main(int argc, char *argv[]) {
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
 
     int nnz_c = 0;
-    double checksum = 0.0;
+    double checksum_trace = 0.0;
+    double checksum_full = 0.0;
     for (int i = 0; i < n; i++) {
-        checksum += C[i][i];
+        checksum_trace += C[i][i];
         for (int j = 0; j < n; j++) {
+            checksum_full += C[i][j];
             if (C[i][j] != 0.0) nnz_c++;
         }
     }
@@ -69,7 +71,7 @@ int main(int argc, char *argv[]) {
     size_t peak_mem_kb = get_peak_memory_kb();
 
     printf("PARALLEL_MATMUL: variant = %s | RequestedThreads = %d | ActualThreads = %d | n = %d | NNZ(A) = %d | NNZ(B) = %d | NNZ(C) = %d | Time = %.6f seconds | PeakMemory = %zu KB | Checksum = %.4f\n",
-            variant, requested_threads, actual_threads, n, nnz_a, nnz_b, nnz_c, elapsed, peak_mem_kb, checksum);
+            variant, requested_threads, actual_threads, n, nnz_a, nnz_b, nnz_c, elapsed, peak_mem_kb, checksum_full);
 
     free_matrix(n, A);
     free_matrix(n, B);

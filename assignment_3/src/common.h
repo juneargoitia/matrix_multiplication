@@ -75,16 +75,35 @@ static inline void generate_matrices(int n, double p, double **A, double **B, do
 }
 
 static inline void multiply_loop_parallel(int n, double **A, double **B, double **C, int threads) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) C[i][j] = 0.0;
-    }
-
 #ifdef _OPENMP
     if (threads > 0) {
         omp_set_num_threads(threads);
     }
-    #pragma omp parallel for schedule(static)
-#endif
+    #pragma omp parallel
+    {
+        #pragma omp for schedule(static)
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                C[i][j] = 0.0;
+            }
+        }
+
+        #pragma omp for schedule(static)
+        for (int i = 0; i < n; i++) {
+            for (int k = 0; k < n; k++) {
+                double a_ik = A[i][k];
+                if (a_ik != 0.0) {
+                    for (int j = 0; j < n; j++) {
+                        C[i][j] += a_ik * B[k][j];
+                    }
+                }
+            }
+        }
+    }
+#else
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) C[i][j] = 0.0;
+    }
     for (int i = 0; i < n; i++) {
         for (int k = 0; k < n; k++) {
             double a_ik = A[i][k];
@@ -95,19 +114,50 @@ static inline void multiply_loop_parallel(int n, double **A, double **B, double 
             }
         }
     }
+#endif
 }
 
 static inline void multiply_tile_parallel(int n, double **A, double **B, double **C, int block_size, int threads) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) C[i][j] = 0.0;
-    }
-
 #ifdef _OPENMP
     if (threads > 0) {
         omp_set_num_threads(threads);
     }
-    #pragma omp parallel for schedule(static) collapse(1)
-#endif
+    #pragma omp parallel
+    {
+        #pragma omp for schedule(static)
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                C[i][j] = 0.0;
+            }
+        }
+
+
+        #pragma omp for schedule(static)
+        for (int ii = 0; ii < n; ii += block_size) {
+            for (int kk = 0; kk < n; kk += block_size) {
+                for (int jj = 0; jj < n; jj += block_size) {
+                    int i_max = (ii + block_size < n) ? ii + block_size : n;
+                    int k_max = (kk + block_size < n) ? kk + block_size : n;
+                    int j_max = (jj + block_size < n) ? jj + block_size : n;
+
+                    for (int i = ii; i < i_max; i++) {
+                        for (int k = kk; k < k_max; k++) {
+                            double a_ik = A[i][k];
+                            if (a_ik != 0.0) {
+                                for (int j = jj; j < j_max; j++) {
+                                    C[i][j] += a_ik * B[k][j];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+#else
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) C[i][j] = 0.0;
+    }
     for (int ii = 0; ii < n; ii += block_size) {
         for (int kk = 0; kk < n; kk += block_size) {
             for (int jj = 0; jj < n; jj += block_size) {
@@ -128,6 +178,7 @@ static inline void multiply_tile_parallel(int n, double **A, double **B, double 
             }
         }
     }
+#endif
 }
 
 #endif

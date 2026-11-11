@@ -12,11 +12,13 @@ if not os.path.exists(raw_path):
 
 df = pd.read_csv(raw_path)
 
+df["BlockSize"] = df["BlockSize"].fillna(0)
+
 df_clean = df[(df["IsWarmup"] == "No") & (df["Status"] == "OK")].copy()
 df_clean["TimeSeconds"] = df_clean["TimeSeconds"].astype(float)
 df_clean["PeakMemoryKB"] = df_clean["PeakMemoryKB"].astype(float)
 
-grouped = df_clean.groupby(["Size", "Build", "Method", "Variant", "BlockSize", "RequestedThreads"]).agg(
+grouped = df_clean.groupby(["Size", "Build", "Method", "Variant", "BlockSize", "RequestedThreads"], dropna=False).agg(
     MeasuredRuns=("TimeSeconds", "count"),
     MedianTime=("TimeSeconds", "median"),
     Q25Time=("TimeSeconds", lambda x: np.percentile(x, 25)),
@@ -67,7 +69,7 @@ for variant in ["ikj", "tile"]:
     ax2.plot(sub["RequestedThreads"], sub["Efficiency"], marker="^", linewidth=2, label=f"Efficiency {label_name}")
 
 threads_arr = np.array([1, 2, 3, 4, 6, 8])
-ax1.plot(threads_arr, threads_arr, 'k--', label="Ideal Linear Speedup", alpha=0.7)
+ax1.plot(threads_arr, threads_arr, color='k', linestyle='--', label="Ideal Linear Speedup", alpha=0.7)
 ax1.axvline(x=2, color='gray', linestyle=':', label="Physical Cores (2)")
 ax1.axvline(x=4, color='red', linestyle=':', label="Logical Threads SMT (4)")
 
@@ -77,7 +79,7 @@ ax1.set_title("Speedup vs Threads (n=2000)")
 ax1.grid(True, linestyle="--", alpha=0.6)
 ax1.legend()
 
-ax2.axhline(y=1.0, color='k--', label="Ideal Efficiency (1.0)", alpha=0.7)
+ax2.axhline(y=1.0, color='k', linestyle='--', label="Ideal Efficiency (1.0)", alpha=0.7)
 ax2.axvline(x=2, color='gray', linestyle=':', label="Physical Cores (2)")
 ax2.axvline(x=4, color='red', linestyle=':', label="Logical Threads SMT (4)")
 ax2.set_xlabel("Thread Count (p)")
