@@ -16,6 +16,14 @@ int main(int argc, char *argv[]) {
     int requested_threads = atoi(argv[3]);
     int block_size = (argc > 4) ? atoi(argv[4]) : 64;
 
+    if (n <= 0) { fprintf(stderr, "Error: matrix size must be > 0\n"); return EXIT_FAILURE; }
+    if (strcmp(variant, "ikj") != 0 && strcmp(variant, "tile") != 0) {
+        fprintf(stderr, "Error: variant must be 'ikj' or 'tile' (got '%s')\n", variant);
+        return EXIT_FAILURE;
+    }
+    if (requested_threads <= 0) { fprintf(stderr, "Error: threads must be > 0\n"); return EXIT_FAILURE; }
+    if (block_size <= 0) { fprintf(stderr, "Error: block size must be > 0\n"); return EXIT_FAILURE; }
+
     double **A = allocate_matrix(n);
     double **B = allocate_matrix(n);
     double **C = allocate_matrix(n);
@@ -25,10 +33,7 @@ int main(int argc, char *argv[]) {
 
     int actual_threads = 1;
 #ifdef _OPENMP
-    if (requested_threads > 0) {
-        omp_set_num_threads(requested_threads);
-    }
-    #pragma omp parallel
+    #pragma omp parallel num_threads(requested_threads)
     {
         #pragma omp single
         {
@@ -70,8 +75,8 @@ int main(int argc, char *argv[]) {
 
     size_t peak_mem_kb = get_peak_memory_kb();
 
-    printf("PARALLEL_MATMUL: variant = %s | RequestedThreads = %d | ActualThreads = %d | n = %d | NNZ(A) = %d | NNZ(B) = %d | NNZ(C) = %d | Time = %.6f seconds | PeakMemory = %zu KB | Checksum = %.4f\n",
-            variant, requested_threads, actual_threads, n, nnz_a, nnz_b, nnz_c, elapsed, peak_mem_kb, checksum_full);
+    printf("PARALLEL_MATMUL: variant = %s | RequestedThreads = %d | ActualThreads = %d | n = %d | NNZ(A) = %d | NNZ(B) = %d | NNZ(C) = %d | Time = %.6f seconds | PeakMemory = %zu KB | ChecksumTrace = %.4f | ChecksumFull = %.4f\n",
+            variant, requested_threads, actual_threads, n, nnz_a, nnz_b, nnz_c, elapsed, peak_mem_kb, checksum_trace, checksum_full);
 
     free_matrix(n, A);
     free_matrix(n, B);

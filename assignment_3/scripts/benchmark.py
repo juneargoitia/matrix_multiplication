@@ -1,9 +1,9 @@
 import subprocess
 import re
 import os
+import random
 import csv
 import argparse
-import numpy as np
 
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
@@ -38,8 +38,11 @@ def grab(pattern, text, cast=float):
     m = re.search(pattern, text)
     return cast(m.group(1)) if m else None
 
+def exe_for(cfg):
+    return os.path.join(".", f"run_matmul_{cfg['Build']}.exe")
+
 def command_for(cfg, n):
-    exe = os.path.join(".", "run_matmul_omp.exe")
+    exe = exe_for(cfg)
     cmd = [exe, str(n), cfg["variant"], str(cfg["threads"])]
     if cfg["variant"] == "tile":
         cmd.append(str(cfg["block"]))
@@ -75,10 +78,9 @@ print(f"sizes={sizes} reps={repetitions} (first discarded) timeout={TIMEOUT_S}s 
 
 env = os.environ.copy()
 env["OMP_DYNAMIC"] = "FALSE"
-env["OMP_WAIT_POLICY"] = "PASSIVE"
-env["OMP_SCHEDULE"] = "STATIC"
+env.pop("OMP_NUM_THREADS", None)
 
-timed_out_configs = set()
+timed_out_configs = {}
 
 all_tasks = []
 for cfg in configs:
@@ -97,7 +99,7 @@ try:
         for shuffle_idx, (cfg, n) in enumerate(shuffled_tasks):
             cfg_key = (cfg["Build"], cfg["variant"], cfg["threads"], cfg["block"])
             
-            if cfg_key in timed_out_configs:
+            if cfg_key in timed_out_configs and n >= timed_out_configs[cfg_key]:
                 writer.writerow({
                     "Size": n, "Build": cfg["Build"], "Method": cfg["label"], "Variant": cfg["variant"],
                     "BlockSize": cfg["block"] if cfg["block"] > 0 else 0,
@@ -109,7 +111,7 @@ try:
                 csv_file.flush()
                 continue
 
-            exe_path = os.path.join(".", "run_matmul_omp.exe")
+            exe_path = exe_for(cfg)
             if not os.path.exists(exe_path):
                 print(f"  [Warning] Executable {exe_path} not found. Run make first.")
                 continue
@@ -142,15 +144,15 @@ try:
                         
                 row_data.update({
                     "ActualThreads": r.get("actual_threads", cfg["threads"]),
-                    "TimeSeconds": f"{r['time']:.6f}" if r.get("time") else "",
+                    "TimeSeconds": f"{r['time']:.6f}" if r.get("time") is not None else "",
                     "PeakMemoryKB": r.get("mem", ""),
-                    "ChecksumTrace": f"{r['chk_trace']:.4f}" if r.get("chk_trace") else "",
-                    "ChecksumFull": f"{r['chk_full']:.4f}" if r.get("chk_full") else "",
+                    "ChecksumTrace": f"{r['chk_trace']:.4f}" if r.get("chk_trace") is not None else "",
+                    "ChecksumFull": f"{r['chk_full']:.4f}" if r.get("chk_full") is not None else "",
                     "Status": status
                 })
             except subprocess.TimeoutExpired:
                 row_data["Status"] = "TIMEOUT"
-                timed_out_configs.add(cfg_key)
+                timed_out_configs[cfg_key] = min(n, timed_out_configs.get(cfg_key, n))
                 print(f"  [TIMEOUT] Configuration {cfg['label']} exceeded {TIMEOUT_S}s at n={n}. Skipping larger sizes.")
             except Exception as e:
                 row_data["Status"] = f"ERROR: {e}"

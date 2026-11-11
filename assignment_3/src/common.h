@@ -75,11 +75,12 @@ static inline void generate_matrices(int n, double p, double **A, double **B, do
 }
 
 static inline void multiply_loop_parallel(int n, double **A, double **B, double **C, int threads) {
+#ifndef _OPENMP
+    (void)threads;
+#endif
 #ifdef _OPENMP
-    if (threads > 0) {
-        omp_set_num_threads(threads);
-    }
-    #pragma omp parallel
+    const int nt = (threads > 0) ? threads : omp_get_max_threads();
+    #pragma omp parallel num_threads(nt)
     {
         #pragma omp for schedule(static)
         for (int i = 0; i < n; i++) {
@@ -118,11 +119,12 @@ static inline void multiply_loop_parallel(int n, double **A, double **B, double 
 }
 
 static inline void multiply_tile_parallel(int n, double **A, double **B, double **C, int block_size, int threads) {
+#ifndef _OPENMP
+    (void)threads;
+#endif
 #ifdef _OPENMP
-    if (threads > 0) {
-        omp_set_num_threads(threads);
-    }
-    #pragma omp parallel
+    const int nt = (threads > 0) ? threads : omp_get_max_threads();
+    #pragma omp parallel num_threads(nt)
     {
         #pragma omp for schedule(static)
         for (int i = 0; i < n; i++) {

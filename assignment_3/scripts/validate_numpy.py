@@ -1,3 +1,6 @@
+import os
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
 import numpy as np
 
 def xorshift32(state):
@@ -35,3 +38,4 @@ if __name__ == "__main__":
     
     print(f"Validation ok: Matrix {n}x{n} generated with Xorshift32 (p=0.0).")
     print(f"Checksum NumPy (trace of C): {np.trace(C_numpy):.4f}")
+    print(f"Checksum NumPy (sum of C):   {C_numpy.sum():.4f}")
