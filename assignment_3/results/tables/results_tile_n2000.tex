@@ -1,0 +1,14 @@
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{rrrrrrrr}
+\hline
+Build & p & Median\_s & IQR\_s & RelIQR & S(p) & E(p) & PeakMem\_KB \\
+\hline
+omp & 1 & 3.8181 & 0.2396 & 0.063 & 1.003 & 1.003 & 102516 \\
+seq & 1 & 3.8298 & 0.0531 & 0.014 & 1.000 & 1.000 & 102528 \\
+\hline
+\end{tabular}
+\caption{Cache tiling (B=64), n = 2000: median runtime, IQR, speedup, efficiency and peak memory.}
+\label{tab:results_tile_n2000}
+\end{table}

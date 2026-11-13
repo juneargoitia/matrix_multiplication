@@ -2,6 +2,8 @@ import subprocess
 import re
 import os
 import random
+import time
+import statistics
 import csv
 import argparse
 
@@ -13,6 +15,7 @@ parser.add_argument("--reps", type=int, default=10, help="runs per configuration
 parser.add_argument("--timeout", type=float, default=60.0, help="seconds per process")
 parser.add_argument("--results-dir", default="results")
 parser.add_argument("--seed", type=int, default=42, help="random seed for shuffling execution order")
+parser.add_argument("--cooldown", type=float, default=30.0, help="seconds to wait between repetitions so the CPU can cool down (0 = off)")
 args_cli = parser.parse_args()
 
 sizes = sorted(args_cli.sizes)
@@ -26,6 +29,7 @@ configs = []
 configs.append({"Build": "seq", "label": "Sequential ikj (1 thread)", "variant": "ikj", "threads": 1, "block": 0})
 configs.append({"Build": "seq", "label": "Sequential Tile B=64 (1 thread)", "variant": "tile", "threads": 1, "block": 64})
 
+LOGICAL = os.cpu_count() or 4
 thread_counts = [1, 2, 3, 4, 6, 8]
 for th in thread_counts:
     tag = " (oversubscribed)" if th > 4 else ""
@@ -82,6 +86,8 @@ env.pop("OMP_NUM_THREADS", None)
 
 timed_out_configs = {}
 
+drift = {}
+first_time = {}
 all_tasks = []
 for cfg in configs:
     for n in sizes:
@@ -159,8 +165,28 @@ try:
             
             writer.writerow(row_data)
             csv_file.flush()
+            
+            if row_data["Status"] == "OK" and rep >= 1:
+                t = float(row_data["TimeSeconds"])
+                base = first_time.setdefault((cfg_key, n), t)
+                drift.setdefault(rep, []).append(t / base)
+
+        if args_cli.cooldown > 0 and rep < repetitions - 1:
+            print(f"  cooling down {args_cli.cooldown:g} s ...")
+            time.sleep(args_cli.cooldown)
 
 finally:
     csv_file.close()
 
 print(f"\nIncremental raw run data saved continuously in '{raw_path}' with shuffle order tracking.")
+
+if len(drift) >= 2:
+    print("\nDrift check (median of time / time in the first measured repetition; ~1.00 means stable):")
+    for rep in sorted(drift):
+        print(f"  repetition {rep}: {statistics.median(drift[rep]):.2f}")
+    last = statistics.median(drift[max(drift)])
+    if last > 1.15:
+        print("  WARNING: runs became >15% slower over time. The machine is throttling or has background load;")
+        print("  the results are not reliable. Check power plan / temperature / other programs and run again.")
+    else:
+        print("  OK: no significant drift.")
